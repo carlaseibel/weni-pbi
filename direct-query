@@ -1,0 +1,23 @@
+let
+iterations = 2, 
+url = "https://api.rapidpro.io/api/v2/runs.json?flow=19aa2473-e92b-4693-bdad-eed0a5708d39",
+headers = [Authorization = "Token 34ba5df95a6f1f8eec38e89c20874acb3a665052"],
+
+ FnGetData =
+(url) as record => 
+let
+Source = Json.Document(Web.Contents(url,[Headers = headers])),
+data = try Source[results] otherwise null, 
+next = try Source[next] otherwise null, 
+res = [Data=data, Next=next] 
+in
+res,
+
+GeneratedList =
+List.Generate(()=> 
+[i=0, res = FnGetData(url)], // Defining a for loop
+each [i]<iterations and [res][Data]<>null, 
+each [i=[i]+1, res = FnGetData([res][Next])], 
+each [res][Data]) 
+in
+GeneratedList
