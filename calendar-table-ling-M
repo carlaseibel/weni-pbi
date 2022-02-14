@@ -1,0 +1,15 @@
+let
+    DateMin = List.Min(fRuns[date_created_on] & fRuns[date_exited_on]),
+    DateMax = List.Max(fRuns[date_created_on] & fRuns[date_exited_on]),
+    Duration = Duration.Days(DateMax - DateMin),
+    Personalizado1 = List.Dates(DateMin, Duration, #duration(1,0,0,0)),
+    #"Convertido em Tabela" = Table.FromList(Personalizado1, Splitter.SplitByNothing(), null, null, ExtraValues.Error),
+    #"Colunas com Nome Mudado" = Table.RenameColumns(#"Convertido em Tabela",{{"Column1", "Data"}}),
+    #"Tipo Alterado" = Table.TransformColumnTypes(#"Colunas com Nome Mudado",{{"Data", type date}}),
+    #"Ano Inserido" = Table.AddColumn(#"Tipo Alterado", "Ano", each Date.Year([Data]), Int64.Type),
+    #"Nome do Mês Inserido" = Table.AddColumn(#"Ano Inserido", "Nome do Mês", each Date.MonthName([Data]), type text),
+    #"Colocar em Maiúsculas Cada Palavra Inserida" = Table.AddColumn(#"Nome do Mês Inserido", "Todas as Palavras em Maiúsculas", each Text.Proper([Nome do Mês]), type text),
+    #"Texto Antes do Delimitador Inserido" = Table.AddColumn(#"Colocar em Maiúsculas Cada Palavra Inserida", "Mês Abrev", each Text.BeforeDelimiter(Text.Proper([Nome do Mês]), "e"), type text),
+    #"Colunas Removidas" = Table.RemoveColumns(#"Texto Antes do Delimitador Inserido",{"Nome do Mês"})
+in
+    #"Colunas Removidas"
